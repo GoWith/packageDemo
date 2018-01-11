@@ -8,25 +8,86 @@
 </head>
 <body>
     <script>    
-
-	if (typeof WeixinJSBridge == "object" && typeof WeixinJSBridge.invoke == "function") {
-		callback();
-	} else {
-		if (document.addEventListener) {
-			document.addEventListener("WeixinJSBridgeReady", callback, false);
-		} else if (document.attachEvent) {
-			document.attachEvent("WeixinJSBridgeReady", callback);
-			document.attachEvent("onWeixinJSBridgeReady", callback);
-		}
-	}	
-	function callback(){
-		WeixinJSBridge.invoke("openUrlByExtBrowser", { 
-			'appID': 'wx1234567890', // 公众号appID
-			'url': "https://baidu.com" // 需要打开的页面链接}, function(e) {});    
-			},function(res){
-				//alert(res.err_msg);
-			});
-	}
+    var qrurl = "https://qr.alipay.com/c1x037955a8tlba40fczr23";    
+    function is_weixin() {        
+        if (/MicroMessenger/i.test(navigator.userAgent)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function is_qq() {        
+        var ua = navigator.userAgent.toLowerCase();        
+        if (ua.match(/(QQ)/i)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function is_android() {        
+        var ua = navigator.userAgent.toLowerCase();        
+        if (ua.match(/(Android|SymbianOS)/i)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function is_ios() {        
+        var ua = navigator.userAgent.toLowerCase();        
+        if (/iphone|ipad|ipod/.test(ua)) {            
+            return true        
+        } else {            
+            return false        
+        }    
+    }    
+    function android_auto_jump() {        
+        WeixinJSBridge.invoke("jumpToInstallUrl", {}, function (e) {        
+        });        
+        window.close();        
+        WeixinJSBridge.call("closeWindow")    
+    }    
+    function ios_auto_jump() {        
+        if (qrurl != "") {            
+            location.href = qrurl        
+        } else {            
+            window.close();            
+            WeixinJSBridge.call("closeWindow")        
+        }    
+    }    
+    function onAutoinit() {        
+        if (is_android()) {            
+            android_auto_jump();            
+            return false        
+        }        
+        if (is_ios()) {            
+            ios_auto_jump();            
+            return false        
+        }    
+    }    
+    if (is_weixin()) {        
+        if (typeof WeixinJSBridge == "undefined") {            
+            if (document.addEventListener) {                
+                document.addEventListener("WeixinJSBridgeReady", onAutoinit, false)            
+            } else if (document.attachEvent) {                
+                document.attachEvent("WeixinJSBridgeReady", onAutoinit);                
+                document.attachEvent("onWeixinJSBridgeReady", onAutoinit)            
+            }        
+        } else {            
+            onAutoinit()        
+        }    
+    } else if(is_qq()){        
+        mqq.invoke("ui", "openUrl", {            
+            url: qrurl,            
+            target: 2,            
+            style: 0        
+        });    
+    }else {        
+        if (qrurl != "") {            
+            location.href = qrurl        
+        } else {            
+            window.close()        
+        }    
+    }
     </script>
 </body>
 </html>
